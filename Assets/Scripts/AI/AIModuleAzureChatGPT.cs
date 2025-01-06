@@ -14,7 +14,7 @@ public class AIModuleAzureChatGPT : MonoBehaviour
     {
         var endpoint = new Uri("https://synthoria.openai.azure.com/");
         var credentials = new AzureKeyCredential("BPKwZSwBIyTnvQLq41kbyIWxcPfBz071J1RJ6skVPqBkQBVwmS7sJQQJ99BAACYeBjFXJ3w3AAABACOGusBw");
-        var deploymentName = "gpt-4"; // Default name, update with your own if needed
+        var deploymentName = "gpt4o"; // Default name, update with your own if needed
 
 
         var openAIClient = new AzureOpenAIClient(endpoint, credentials);
@@ -29,9 +29,8 @@ public class AIModuleAzureChatGPT : MonoBehaviour
         };
 
         ChatCompletion chatCompletion = await chatClient.CompleteChatAsync(messages);
-        Console.WriteLine($"[ASSISTANT]:");
-        Console.WriteLine($"{chatCompletion.Content[0].Text}");
-
+        Debug.Log($"[ASSISTANT]:");
+        Debug.Log($"{chatCompletion.Content[0].Text}");
     }
 
     async void Start()
