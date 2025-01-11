@@ -115,21 +115,22 @@ public class AIModuleSST : AIModule
         // Debug.Log(data);
         var deploymentName = "whisper";
 
-        var openAIClient = new AzureOpenAIClient(endpoint, credentials);
-
-        var audioClient = openAIClient.GetAudioClient(deploymentName);
-
-        string filePath = Path.Combine(Application.persistentDataPath, filename);
-        
-        Debug.Log(filePath);
-
         try
         {
-            var result = await audioClient.TranscribeAudioAsync(filePath);
+            var openAIClient = new AzureOpenAIClient(endpoint, credentials);
+
+            var audioClient = openAIClient.GetAudioClient(deploymentName);
+
+            string filePath = Path.Combine(Application.persistentDataPath, filename);
+        
+            Debug.Log(filePath);
+
+            var result = await audioClient.TranslateAudioAsync(filePath);
+            // var result = await audioClient.TranscribeAudioAsync(filePath);
             // var result = await audioClient.TranscribeAudioAsync("/Users/bagsangjun/Desktop/TalkForAFewSeconds16.wav");
             foreach (var item in result.Value.Text)
             {
-            Debug.Log(item);
+                Debug.Log(item);
             }
         }
         catch(RequestFailedException ex)
