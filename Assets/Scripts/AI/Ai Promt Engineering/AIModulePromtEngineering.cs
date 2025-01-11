@@ -145,7 +145,7 @@ public class AIModulePromtEngineering : MonoBehaviour, IDataPersistence
         initialPromt += $"You will perform sentiment analysis on users response. However, you will make sure that you will directly refer to users emotion or provide suggetions that is related to the emotion {awarenessPercentage}% of the time. Do not use emoji.";
         initialPromt += $"Make sure everything you reply is under {maxReplyWordsLimit} words. Howevever, you can override depending on the situation.";
 
-        var promt = PromtFromWeatherInfo(); 
+        var promt = "";//PromtFromWeatherInfo(); 
         promt += PromtFromUserProfile();
         promt += PromtFromTimeInfo();
         promt += "You do not need contain phrases that refelcts your will to assist or answer question; unless required. You do not need to direcly refer to the information provided above during your conversation but make use of it when needed.";

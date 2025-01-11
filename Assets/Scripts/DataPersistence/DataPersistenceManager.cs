@@ -31,7 +31,7 @@ public class DataPersistenceManager : MonoBehaviour
         }
         instance = this;
 
-        string folderName = "AiCompanion";
+        string folderName = "AiTutor";
         string securePath;
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
