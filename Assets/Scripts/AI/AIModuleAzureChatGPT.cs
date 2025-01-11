@@ -23,30 +23,72 @@ public class AIModuleAzureChatGPT : MonoBehaviour
 
     private void ScreenShot(string savePath)
     {
-        string folderName = "AiTutor";
-        string dataDirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), folderName);
+        // Using preprocessor directives to check the platform
+        #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+            // Windows-specific code
+            string folderName = "AiTutor";
+            string dataDirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), folderName);
 
-        if (!Directory.Exists(dataDirPath))
+            if (!Directory.Exists(dataDirPath))
+            {
+                Directory.CreateDirectory(dataDirPath);
+            }
+
+            DesktopScreenshot.CaptureDesktop(savePath);
+
+        #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+            // macOS-specific code
+            CaptureMacScreenshot(savePath);
+        #endif
+    }
+
+    private void CaptureMacScreenshot(string savePath)
+    {
+        // macOS specific directory
+        string folderName = "AiTutor";
+        string appSupportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Library/Application Support", folderName);
+
+        // Ensure the directory exists
+        if (!Directory.Exists(appSupportPath))
         {
-            Directory.CreateDirectory(dataDirPath);
+            Directory.CreateDirectory(appSupportPath);
         }
 
-        DesktopScreenshot.CaptureDesktop(savePath);
+        // Set the path to save the screenshot
+        string saveMacPath = Path.Combine(appSupportPath, "DesktopScreenshot.png");
+
+        // Use the ScreenCapture functionality for Unity on macOS
+        Texture2D screenshotTexture = ScreenCapture.CaptureScreenshotAsTexture();
+
+        // Encode the texture to PNG
+        byte[] screenshotBytes = screenshotTexture.EncodeToPNG();
+
+        // Save the file
+        File.WriteAllBytes(saveMacPath, screenshotBytes);
+
+        // Optionally, destroy the texture if you're done with it
+        Destroy(screenshotTexture);
+
+        // Log and return the save path
+        Debug.Log($"macOS screenshot saved to: {saveMacPath}");
     }
 
     private async Task CaptureAndSendScreenshot()
     {
-        // Take a screenshot and save it temporarily
+        // Define the path to save the screenshot
         string folderName = "AiTutor";
-        string dataDirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), folderName);
+        string appSupportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Library/Application Support", folderName);
 
-        if (!Directory.Exists(dataDirPath))
+        // Ensure the directory exists
+        if (!Directory.Exists(appSupportPath))
         {
-            Directory.CreateDirectory(dataDirPath);
+            Directory.CreateDirectory(appSupportPath);
         }
 
-        string savePath = Path.Combine(dataDirPath, "DesktopScreenshot.png");
-        DesktopScreenshot.CaptureDesktop(savePath);
+        string savePath = Path.Combine(appSupportPath, "DesktopScreenshot.png");
+
+        // Take a screenshot and save it
+        ScreenShot(savePath);
 
         // Convert the screenshot to binary data
         byte[] screenshotBytes = File.ReadAllBytes(savePath);
