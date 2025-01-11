@@ -10,7 +10,7 @@ using OpenAI;
 using TMPro;
 using ChatMessage = OpenAI.Chat.ChatMessage;
 
-public class AIModuleAzureChatGPT : AIModule
+public class AIModuleAzureChatGPT : AIModule, IDataPersistence
 {
     private List<ChatMessage> messages = new List<ChatMessage>();
     private List<ChatMessage> messages2 = new List<ChatMessage>();
@@ -21,16 +21,15 @@ public class AIModuleAzureChatGPT : AIModule
     private DataPersistenceManager _dataPersistenceManager;
     private UserProfile _userProfile;
 
-    protected override void Awake(){}
+    protected override void Awake(){base.Awake();}
 
-    protected override async void Start()
+    protected override void Start()
     {
+        base.Start();
         _dataPersistenceManager = _brain.dataPersistenceManager;
         _aiModuleTalk = GetComponent<AIModuleActionTalk>();
         _aiTTS = GetComponentInChildren<AIModuleTTS2>();
         _promtEngineering = GetComponentInChildren<AIModulePromtEngineering>();
-
-        await StartAsync();
     }
 
     private void ScreenShot(string savePath)
@@ -269,13 +268,7 @@ public class AIModuleAzureChatGPT : AIModule
     
     
 
-    private async Task StartAsync()
-    {
-        // Call the CaptureAndSendScreenshot method to demonstrate usage
-        // await CaptureAndSendScreenshot();
-    }
-
-    //public override void ModuleUpdate() { }
+    //public override void ModuleUpdate() {}
     
     
     private void UpdateSaveFile()

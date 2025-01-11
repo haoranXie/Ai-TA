@@ -5,8 +5,7 @@ using UnityEngine.UI;
 
 public class AIBrain : MonoBehaviour, IDataPersistence
 {
-    [Header("AI")]
-    [SerializeField]
+    [Header("AI")] [SerializeField] public bool UseAzure = true;
     public string openAPIKey;
     public string OpenWeatherAPIKey;
     public string ElevenLabsAPIKey;

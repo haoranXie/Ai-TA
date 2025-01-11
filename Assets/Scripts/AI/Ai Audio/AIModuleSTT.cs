@@ -25,6 +25,8 @@ public class AIModuleSST : AIModule
     private AIModuleActionTalk aiModuleActionTalk;
     private AudioClip clip;
     private OpenAIApi openai;
+    private AIModuleAzureChatGPT _aiModuleAzureChatgpt;
+
 
     private bool isRecording = false; // Tracks recording status
     private readonly string filename = "Output.wav";
@@ -39,6 +41,7 @@ public class AIModuleSST : AIModule
         base.Start();
         openai = _brain.openAIAPI;
         aiModuleChatgpt = this.GetComponentInParent<AIModuleChatgpt>();
+        _aiModuleAzureChatgpt = this.GetComponentInParent<AIModuleAzureChatGPT>();
         button.onClick.AddListener(ToggleRecording);
         textMeshprofield = _brain.dialogueInput;
         inputField = _brain.dialogueInput;
@@ -93,20 +96,21 @@ public class AIModuleSST : AIModule
         }
     }
 
-    // private async void ProcessRecording()
-    // {
-    //     byte[] data = SaveWav.Save(filename, clip);
-    //     var req = new CreateAudioTranscriptionsRequest
-    //     {
-    //         FileData = new FileData() { Data = data, Name = "audio.wav" },
-    //         Model = "whisper-1"
-    //     };
+     private async void ProcessRecording()
+     {
+         byte[] data = SaveWav.Save(filename, clip);
+         var req = new CreateAudioTranscriptionsRequest
+         {
+             FileData = new FileData() { Data = data, Name = "audio.wav" },
+             Model = "whisper-1"
+         };
         
-    //     var res = await openai.CreateAudioTranscription(req);
-    //     textMeshprofield.text = res.Text;
-    //     aiModuleChatgpt?.HandleCalendarRequest(res.Text, inputField);
-    // }
-
+         var res = await openai.CreateAudioTranscription(req);
+         textMeshprofield.text = res.Text;
+         if(_brain.UseAzure){_aiModuleAzureChatgpt.SendAnalysisRequest(res.Text, inputField);}
+         else{aiModuleChatgpt?.HandleCalendarRequest(res.Text, inputField);}
+     }
+    /*
     private async void ProcessRecording()
     {
         var endpoint = new Uri("https://haora-m5sknlh0-northcentralus.cognitiveservices.azure.com/openai/deployments/whisper/audio/translations?api-version=2024-06-01");
@@ -141,6 +145,7 @@ public class AIModuleSST : AIModule
             Debug.LogException(ex);
         }
     }
+    */
 
     // private async void ProcessRecording()
     // {

@@ -8,6 +8,8 @@ public class AIModuleUserTextInput : AIModule
     private SimpleStateMachine<AIStates.BehaviorStates> _behaviorState;
 
     private AIModuleChatgpt _aiModuleChatgpt;
+    private AIModuleAzureChatGPT _aiModuleAzureChatgpt;
+
 
     protected override void Start()
     {
@@ -16,6 +18,7 @@ public class AIModuleUserTextInput : AIModule
         _inputFieldObject = _brain.inputFieldObject;
         _behaviorState = _brain.BehaviorState;
         _aiModuleChatgpt = GetComponent<AIModuleChatgpt>();
+        _aiModuleAzureChatgpt = GetComponent<AIModuleAzureChatGPT>();
     }
     
     public void GrabFromInputField(string input)
@@ -28,7 +31,8 @@ public class AIModuleUserTextInput : AIModule
         {
             //_aiModuleChatgpt.SendReply(input, _inputField);
             //_aiModuleChatgpt.SendAnalysisRequest(input, _inputField);
-            _aiModuleChatgpt.HandleCalendarRequest(input, _inputField);
+            if(_brain.UseAzure) _aiModuleAzureChatgpt.SendAnalysisRequest(input, _inputField);
+            else{_aiModuleChatgpt.HandleCalendarRequest(input, _inputField);}
         }
     }
 
