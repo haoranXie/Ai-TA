@@ -30,11 +30,6 @@ public class AIModuleAzureChatGPT : AIModule
         _aiTTS = GetComponentInChildren<AIModuleTTS2>();
         _promtEngineering = GetComponentInChildren<AIModulePromtEngineering>();
 
-        // Set up the initial system message
-        messages.Add(new SystemChatMessage(
-            ChatMessageContentPart.CreateTextPart("You are a helpful tutor. You will not disclose real answers. You will not use mathematical equations. You will reply within 30 words.")
-        ));
-
         await StartAsync();
     }
 
@@ -90,7 +85,7 @@ public class AIModuleAzureChatGPT : AIModule
         Debug.Log($"macOS screenshot saved to: {saveMacPath}");
     }
 
-    private async Task CaptureAndSendScreenshot()
+    private async Task CaptureAndSendScreenshot(string message )
     {
         // Define the path to save the screenshot
         string folderName = "AiTutor";
@@ -115,7 +110,7 @@ public class AIModuleAzureChatGPT : AIModule
         // Add the screenshot message to the chat
         messages.Add(
             new UserChatMessage(
-                ChatMessageContentPart.CreateTextPart("Here's a screenshot. Can you help analyze it?"),
+                ChatMessageContentPart.CreateTextPart(message),
                 ChatMessageContentPart.CreateImagePart(binaryImageData, imageBytesMediaType)
             )
         );
@@ -129,7 +124,6 @@ public class AIModuleAzureChatGPT : AIModule
         var chatClient = openAIClient.GetChatClient(deploymentName);
 
         ChatCompletion chatCompletion = await chatClient.CompleteChatAsync(messages);
-        Debug.Log($"[ASSISTANT]: {chatCompletion.Content[0].Text}");
 
         // Add assistant's response back to the messages list
         messages.Add(new AssistantChatMessage(ChatMessageContentPart.CreateTextPart(chatCompletion.Content[0].Text)));
@@ -137,37 +131,35 @@ public class AIModuleAzureChatGPT : AIModule
     
     public async void SendAnalysisRequest(string userMessage, TMP_InputField inputField = null)
     {
+
         // Generate analysis prompt with example structure
         var analysisPrompt = _promtEngineering.GetAnalysisPrompt(userMessage, _userProfile.pastTopics);
         
-        var analysisMessage = new UserChatMessage(
-            ChatMessageContentPart.CreateTextPart();
-        );
-        
-        var analysisMessage = new ChatMessage
-        {
-            Role = "user",
-            Content = analysisPrompt
-        };
-
-        messages2.Add(analysisMessage);
+        messages2.Add(new UserChatMessage(
+            ChatMessageContentPart.CreateTextPart(analysisPrompt)
+        ));
 
         if (inputField != null)
         {
             inputField.text = "";
             inputField.enabled = false;
         }
-        
-        var completionResponse = await openai.CreateChatCompletion(new CreateChatCompletionRequest
-        {
-            Model = "gpt-4o-mini",
-            Messages = messages2
-        });
 
-        if (completionResponse.Choices != null && completionResponse.Choices.Count > 0)
+        // chat competion
+
+        var endpoint = new Uri("https://synthoria.openai.azure.com/");
+        var credentials = new AzureKeyCredential("BPKwZSwBIyTnvQLq41kbyIWxcPfBz071J1RJ6skVPqBkQBVwmS7sJQQJ99BAACYeBjFXJ3w3AAABACOGusBw");
+        var deploymentName = "gpt4o"; // Update with your deployment name
+
+        var openAIClient = new AzureOpenAIClient(endpoint, credentials);
+        var chatClient = openAIClient.GetChatClient(deploymentName);
+
+        ChatCompletion chatCompletion = await chatClient.CompleteChatAsync(messages2);
+        var message = chatCompletion.Content[0].Text;
+        
+        if (message != null)
         {
-            var message = completionResponse.Choices[0].Message;
-            SendReply(userMessage, inputField, _userProfile.ParseAnalysisResponse(message.Content));
+            SendReply(userMessage, inputField, _userProfile.ParseAnalysisResponse(message));
             // Parse and apply the JSON response to     user profile
             //ParseAnalysisResponse(message.Content);
         }
@@ -189,54 +181,83 @@ public class AIModuleAzureChatGPT : AIModule
     public async void SendReply(string reply, TMP_InputField inputField = null, List<String> relevantPastTopics = null)
     {
         UpdateSaveFile();
-        var newMessage = new ChatMessage()
-        {
-            Role = "user",
-            Content = reply
-        };
-        
-        // for each relevant memory, fetch the topic, contextualSentiment, memoryContext and feed that to 
+
         if (messages.Count == 0)
         {
-            newMessage.Content = _promtEngineering.GetPromtFromPromtEngineering();
-            if (_supportLanguages)
+            // Set up the initial system message
+            var promt = "";
+            promt += _promtEngineering.GetPromtFromPromtEngineering();
+            if (true)
             {
-                newMessage.Content += "Speak the language the user speaks in";
+                promt += "Speak the language the user speaks in";
             }
-            newMessage.Content += "\n" + reply;
-        }
-        else
-        {
-            newMessage.Content = _promtEngineering.PromtFromTimeInfo() +
-                                 _promtEngineering.PromptFromRelevantMemories(relevantPastTopics);
-            if (_supportLanguages)
-            {
-                newMessage.Content += "Speak the language the user speaks in";
-            }
-            newMessage.Content += "\n" + reply;
-        }
-        messages.Add(newMessage);
+            promt += "You are a helpful tutor. You will not disclose real answers. You will not use mathematical equations. You will reply within 30 words.";
 
+            messages.Add(new SystemChatMessage(
+                ChatMessageContentPart.CreateTextPart(promt)
+            ));
+
+        }
+        
+        // regular sednign message aka parsing user message 
+        var message = "";
+        message += _promtEngineering.PromtFromTimeInfo() + _promtEngineering.PromptFromRelevantMemories(relevantPastTopics) + "Speak the language the user speaks in";
+        message += reply;
+
+        // Define the path to save the screenshot
+        string folderName = "AiTutor";
+        string appSupportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Library/Application Support", folderName);
+
+        // Ensure the directory exists
+        if (!Directory.Exists(appSupportPath))
+        {
+            Directory.CreateDirectory(appSupportPath);
+        }
+
+        string savePath = Path.Combine(appSupportPath, "DesktopScreenshot.png");
+
+        // Take a screenshot and save it
+        ScreenShot(savePath);
+
+        // Convert the screenshot to binary data
+        byte[] screenshotBytes = File.ReadAllBytes(savePath);
+        BinaryData binaryImageData = new BinaryData(screenshotBytes);
+        string imageBytesMediaType = "image/png";
+
+        // Add the screenshot message to the chat
+        messages.Add(
+            new UserChatMessage(
+                ChatMessageContentPart.CreateTextPart(message),
+                ChatMessageContentPart.CreateImagePart(binaryImageData, imageBytesMediaType)
+            )
+        );
+
+        // Send the message to the Azure OpenAI Chat Client
+        var endpoint = new Uri("https://synthoria.openai.azure.com/");
+        var credentials = new AzureKeyCredential("BPKwZSwBIyTnvQLq41kbyIWxcPfBz071J1RJ6skVPqBkQBVwmS7sJQQJ99BAACYeBjFXJ3w3AAABACOGusBw");
+        var deploymentName = "gpt4o"; // Update with your deployment name
+
+        var openAIClient = new AzureOpenAIClient(endpoint, credentials);
+        var chatClient = openAIClient.GetChatClient(deploymentName);
+        
         if (inputField != null)
         {
             inputField.text = "";
             inputField.enabled = false;
         }
+
+        ChatCompletion chatCompletion = await chatClient.CompleteChatAsync(messages);
+
+        // Add assistant's response back to the messages list
+        messages.Add(new AssistantChatMessage(ChatMessageContentPart.CreateTextPart(chatCompletion.Content[0].Text)));
         
-        var completionResponse = await openai.CreateChatCompletion(new CreateChatCompletionRequest()
-        {
-            Model = "gpt-4o-mini",
-            Messages = messages,
-        });
         
-        if (completionResponse.Choices != null && completionResponse.Choices.Count > 0)
+        if (chatCompletion.Content[0].Text != null)
         {
-            var message = completionResponse.Choices[0].Message;
-            message.Content = message.Content.Trim();
+            var messagefromgpt = chatCompletion.Content[0].Text;
                 
-            messages.Add(message);
-            if(_aiModuleTalk!=null) _aiModuleTalk.Talk(message.Content);
-            StartCoroutine(_aiTTS.CallTTS(message.Content));
+            if(_aiModuleTalk!=null) _aiModuleTalk.Talk(messagefromgpt);
+            StartCoroutine(_aiTTS.CallTTS(messagefromgpt));
         }
         else
         {
@@ -251,7 +272,7 @@ public class AIModuleAzureChatGPT : AIModule
     private async Task StartAsync()
     {
         // Call the CaptureAndSendScreenshot method to demonstrate usage
-        await CaptureAndSendScreenshot();
+        // await CaptureAndSendScreenshot();
     }
 
     //public override void ModuleUpdate() { }
