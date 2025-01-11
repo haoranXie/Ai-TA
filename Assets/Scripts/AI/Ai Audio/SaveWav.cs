@@ -51,6 +51,12 @@ public static class SaveWav
 				ConvertAndWrite(memoryStream, clip);
 				WriteHeader(memoryStream, clip);
 
+				// write file to the folder
+				using (var fileStream = new FileStream(filepath, FileMode.Create, FileAccess.Write))
+        		{
+            	memoryStream.WriteTo(fileStream);
+        		}
+
 				return memoryStream.GetBuffer();
 			}
 		}
