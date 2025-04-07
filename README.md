@@ -17,13 +17,13 @@ Together, these tools give teachers a way to support large, diverse classrooms
 
 ---
 
-## 🎬 Demo
+## Demo
 
-👉 [**Watch the demo**](https://1drv.ms/v/c/5f70fdf91c3fd77e/EX7XPxz5_XAggF8mEwAAAAABoHX3g6Ngbc7rOuziYXwzjA?e=ZNhDDU) on OneDrive
+ [**Watch the demo**](https://1drv.ms/v/c/5f70fdf91c3fd77e/EX7XPxz5_XAggF8mEwAAAAABoHX3g6Ngbc7rOuziYXwzjA?e=ZNhDDU) on OneDrive
 
 ---
 
-## 🧠 Architecture
+## Architecture
 
 ![Architecture Diagram](Architecture.png)
 
@@ -46,14 +46,14 @@ Ai-TA is composed of three integrated layers:
 
 ---
 
-## ✨ Features
+## Features
 
 - 🎓 **Real-Time Tutoring** — Ai adapts to student behavior using screen and optional camera input  
 - 📊 **Dashboards** — Teachers and parents gain visibility into student progress  
 - 🈯 **Multilingual Support** — Designed to work across languages and regions  
 ---
 
-## 🛠 Installation
+## Installation
 
 ### Requirements
 
@@ -74,11 +74,11 @@ Ai-TA is composed of three integrated layers:
 #### Run the Project
 5. Hit the **Play** button in Unity to start testing the application
 
-> ⚙️ No manual installation is needed for the embedded Python environment — it runs seamlessly with the Unity build.
+> ⚙ No manual installation is needed for the embedded Python environment — it runs seamlessly with the Unity build.
 
 ---
 
-## 🙏 Credits
+## Credits
 
 - **Character & Image Assets**:  
   With permission from [LorisYounger/VPet](https://github.com/LorisYounger/VPet)
@@ -90,7 +90,3 @@ Ai-TA is composed of three integrated layers:
 > Special thanks to UMass Amherst faculty and the Microsoft Imagine Cup team.
 
 ---
-
-## 📜 License
-
-This project is intended for **educational and nonprofit research purposes only**.  
