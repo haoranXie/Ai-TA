@@ -17,12 +17,6 @@ Together, these tools give teachers a way to support large, diverse classrooms
 
 ---
 
-## Demo
-
- [**Watch the demo**](https://1drv.ms/v/c/5f70fdf91c3fd77e/EX7XPxz5_XAggF8mEwAAAAABoHX3g6Ngbc7rOuziYXwzjA?e=ZNhDDU) on OneDrive
-
----
-
 ## Architecture
 
 ![Architecture Diagram](Architecture.png)
