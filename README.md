@@ -77,10 +77,6 @@ Ai-TA is composed of three integrated layers:
 - **Character & Image Assets**:  
   With permission from [LorisYounger/VPet](https://github.com/LorisYounger/VPet)
 
-- **Developed by**:  
-  - [Haoran Xie](https://github.com/haoranXie)  
-  - [Ssangjun Park](https://github.com/ssangjunpark)
-
 > Special thanks to UMass Amherst faculty and the Microsoft Imagine Cup team.
 
 ---
